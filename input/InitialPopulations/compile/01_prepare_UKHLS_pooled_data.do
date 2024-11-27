@@ -57,28 +57,28 @@ foreach w of global UKHLSwaves {
 	if (`waveno'==1) {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_sf12mcs_dv `w'_sf12pcs_dv `w'_sclfsato `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
-		`w'_j2hrs `w'_jshrs /*`w'_scsfl*/ `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		`w'_j2hrs `w'_jshrs /*`w'_scsfl*/ `w'_jbsic07_cc `w'_bendis* ///
 		/*`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* */ ///
 		using `w'_indresp.dta, clear
 	}
 	else if (`waveno'<6) {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_sf12mcs_dv `w'_sf12pcs_dv `w'_sclfsato `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
-		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_jbsic07_cc `w'_bendis* ///
 		`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw /*`w'_indpxui_xw*/ `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* ///
 		using `w'_indresp.dta, clear
 	}
 	else if (`waveno'<13) {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_sf12mcs_dv `w'_sf12pcs_dv `w'_sclfsato `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
-		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_jbsic07_cc `w'_bendis* ///
 		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* ///
 		using `w'_indresp.dta, clear
 	} 
 	else {
 		use pidp `w'_hidp `w'_pno /*`w'_buno_dv*/ `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_sf12mcs_dv `w'_sf12pcs_dv `w'_sclfsato `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
-		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_jbsic07_cc `w'_bendis* ///
 		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_indpxui_xw ///
 		using `w'_indresp.dta, clear 
 		gen m_j2hrs=-9 /*m_j2hrs not available in wave 13*/
