@@ -377,8 +377,28 @@ replace dhm_flag=1 if missing(dhm) & dag>0 & dag<= 18 //flag fro imputations//
 replace dhm = round(dhm_prediction) if missing(dhm) & dag>0 & dag<= 18
 */
 
+/* dwb_mcs dwb_pcs    "DEMOGRAPHIC: wellbeing - mental and physical component summary scores SF12 */
+
+gen dwb_mcs = sf12mcs_dv
+replace dwb_mcs = . if sf12mcs_dv < 0
+lab var dwb_mcs "DEMOGRAPHIC: Subjective wellbeing - Mental (SF12 MCS)"
+// fre dwb_mcs if dag>0 & dag<16
+gen dwb_pcs = sf12pcs_dv
+replace dwb_pcs = . if sf12pcs_dv < 0
+lab var dwb_pcs "DEMOGRAPHIC: Subjective wellbeing - Physical (SF12 PCS)"
+// fre dwb_pcs if dag>0 & dag<16
+
+/* dls DEMOGRAPHIC: life satisfaction */
+
+
+gen dls = sclfsato
+replace dls = . if sclfsato < 0
+lab var dls "DEMOGRAPHIC: Life Satisfaction"
+// fre dls if dag>0 & dag<16
+
 *New imputation for all (decided to implement on 26 March 2024): 
 fre dag if missing(dhm)
+// fre dag if missing(dwb_mcs)
 
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
@@ -386,11 +406,48 @@ eststo predict_dhm: reg dhm c.dag i.dgn i.swv i.dhe, vce(robust) // Physical hea
 restore
 estimates restore predict_dhm
 predict dhm_prediction
-fre dhm_prediction
+// fre dhm_prediction
 
 gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
+
+/* Predict wellbeing where missing */
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dwb_mcs: reg dwb_mcs c.dag i.dgn i.swv i.dhe c.dhm, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dwb_mcs
+predict dwb_mcs_prediction
+// fre dwb_mcs_prediction
+
+gen dwb_mcs_flag = missing(dwb_mcs)
+replace dwb_mcs = round(dwb_mcs_prediction) if missing(dwb_mcs) 
+bys dwb_mcs_flag : sum dwb_mcs 
+
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dwb_pcs: reg dwb_pcs c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dwb_pcs
+predict dwb_pcs_prediction
+// fre dwb_pcs_prediction
+
+gen dwb_pcs_flag = missing(dwb_pcs)
+replace dwb_pcs = round(dwb_pcs_prediction) if missing(dwb_pcs) 
+bys dwb_pcs_flag : sum dwb_pcs 
+
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dls
+predict dls_prediction
+// fre dls_prediction
+
+gen dls_flag = missing(dls)
+replace dls = round(dls_prediction) if missing(dls) 
+bys dls_flag : sum dls 
 
 /*"DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness 
 0: not psychologically distressed, scghq2_dv < 4 
@@ -426,7 +483,7 @@ restore
 
 estimates restore predict_scghq2
 predict scghq2_prediction
-fre scghq2_prediction
+// fre scghq2_prediction
 
 cap gen scghq2_dv_flag=missing(scghq2_dv) 
 replace scghq2_dv = round(scghq2_prediction) if missing(scghq2_dv) 
@@ -438,7 +495,7 @@ cap gen dhm_ghq	= .
 replace dhm_ghq = 0 if scghq2_dv>=0 & scghq2_dv<4
 replace dhm_ghq = 1 if scghq2_dv>=4 
 lab var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness"
-fre dhm_ghq
+// fre dhm_ghq
 
 
 /******************************Education status********************************/
@@ -1440,6 +1497,7 @@ replace dwt = 0 if missing(dwt)
 /***************************Keep required variables****************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
+        dwb_mcs dwb_pcs dls ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date
@@ -1450,6 +1508,7 @@ sort swv idhh idperson
 /**************************Recode missing values*******************************/
 foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
+        dwb_mcs dwb_pcs dls ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
 	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  {
