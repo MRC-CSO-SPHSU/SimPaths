@@ -36,6 +36,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static int maxNumberOfRuns = 25;
 	private static Long randomSeed = 615L;
 	public static boolean executeWithGui = true;
+	public static boolean initialisePopulation = false;
 
 	// innovation args
 	private static boolean randomSeedInnov = true;
@@ -88,6 +89,14 @@ public class SimPathsMultiRun extends MultiRun {
 			return;
 		}
 		country = Country.getCountryFromNameString(countryString);
+
+		if (initialisePopulation) {
+			try {
+				SimPathsStart.runGUIlessSetup(4, executeWithGui);
+			} catch (FileNotFoundException f) {
+				System.err.println(f.getMessage());
+			};
+		}
 
 		if (flagDatabaseSetup) {
 
@@ -148,6 +157,9 @@ public class SimPathsMultiRun extends MultiRun {
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
+		Option fullSetup = new Option("Setup", "Initialise population database from files (same as `singlerun.jar -Setup`");
+		options.addOption(fullSetup);
+
 		Option helpOption = new Option("h", "help", false, "Print this help message");
 		options.addOption(helpOption);
 
@@ -189,6 +201,11 @@ public class SimPathsMultiRun extends MultiRun {
 			if (cmd.hasOption("p")) {
 				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
+
+			if (cmd.hasOption("Setup")) {
+				initialisePopulation = true;
+			}
+
 			if (cmd.hasOption("f")) {
 				try {
 					File logDir = new File("output/logs");
