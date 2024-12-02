@@ -70,7 +70,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			runGUIdialog();
 		} else {
 			try {
-				runGUIlessSetup(4);
+				runGUIlessSetup(4, false);
 			} catch (FileNotFoundException f) {
 				System.err.println(f.getMessage());
 			};
@@ -204,7 +204,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		model.setCollector(collector);
 	}
 
-	private static void runGUIlessSetup(int option) throws FileNotFoundException {
+	protected static void runGUIlessSetup(int option, boolean setupGui) throws FileNotFoundException {
 
 		// Detect if data available; set to testing data if not
 		Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
@@ -231,7 +231,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		Parameters.instantiateAlignmentMaps();
 
 		// set-up database
-		Parameters.databaseSetup(country, showGui, startYear);
+		Parameters.databaseSetup(country, setupGui, startYear);
 	}
 
 	public static void writePolicyScheduleExcelFile() {
