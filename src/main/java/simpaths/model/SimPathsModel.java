@@ -2288,7 +2288,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             if (isFirstRun) {
 
                 Class.forName("org.h2.Driver");
-                conn = DriverManager.getConnection("jdbc:h2:file:" + DatabaseUtils.databaseInputUrl + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+                conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
                 TaxDonorDataParser.updateDefaultDonorTables(conn, country);
             }
         }
@@ -3290,9 +3290,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
 
             // query database
-            Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
@@ -3356,9 +3354,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         EntityTransaction txn = null;
         try {
 
-            Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();txn = em.getTransaction();
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            txn = em.getTransaction();
             txn.begin();
 
             Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
