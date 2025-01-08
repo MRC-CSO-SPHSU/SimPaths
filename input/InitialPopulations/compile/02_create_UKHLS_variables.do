@@ -5,8 +5,8 @@
 ***************************************************************************************
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave m]
-* AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          10 Apr 2024
+* AUTHORS: 				Daria Popova, Justin van de Ven, Andy Baxter
+* LAST UPDATE:          8 January 2025
 * NOTE:					Called from 00_master.do - see master file for further details
 *						Use -9 for missing values 
 ***************************************************************************************
@@ -377,16 +377,16 @@ replace dhm_flag=1 if missing(dhm) & dag>0 & dag<= 18 //flag fro imputations//
 replace dhm = round(dhm_prediction) if missing(dhm) & dag>0 & dag<= 18
 */
 
-/* dwb_mcs dwb_pcs    "DEMOGRAPHIC: wellbeing - mental and physical component summary scores SF12 */
+/* dhe_mcs dhe_pcs    "DEMOGRAPHIC: Self-rated health health - mental and physical component summary scores SF12 */
 
-gen dwb_mcs = sf12mcs_dv
-replace dwb_mcs = . if sf12mcs_dv < 0
-lab var dwb_mcs "DEMOGRAPHIC: Subjective wellbeing - Mental (SF12 MCS)"
-// fre dwb_mcs if dag>0 & dag<16
-gen dwb_pcs = sf12pcs_dv
-replace dwb_pcs = . if sf12pcs_dv < 0
-lab var dwb_pcs "DEMOGRAPHIC: Subjective wellbeing - Physical (SF12 PCS)"
-// fre dwb_pcs if dag>0 & dag<16
+gen dhe_mcs = sf12mcs_dv
+replace dhe_mcs = . if sf12mcs_dv < 0
+lab var dhe_mcs "DEMOGRAPHIC: Subjective Self-rated health - Mental (SF12 MCS)"
+// fre dhe_mcs if dag>0 & dag<16
+gen dhe_pcs = sf12pcs_dv
+replace dhe_pcs = . if sf12pcs_dv < 0
+lab var dhe_pcs "DEMOGRAPHIC: Subjective Self-rated health - Physical (SF12 PCS)"
+// fre dhe_pcs if dag>0 & dag<16
 
 /* dls DEMOGRAPHIC: life satisfaction */
 
@@ -398,7 +398,7 @@ lab var dls "DEMOGRAPHIC: Life Satisfaction"
 
 *New imputation for all (decided to implement on 26 March 2024): 
 fre dag if missing(dhm)
-// fre dag if missing(dwb_mcs)
+// fre dag if missing(dhe_mcs)
 
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
@@ -412,34 +412,34 @@ gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
 
-/* Predict wellbeing where missing */
+/* Predict self-rated health where missing */
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
-eststo predict_dwb_mcs: reg dwb_mcs c.dag i.dgn i.swv i.dhe c.dhm, vce(robust) // Physical health has a big impact, so included as covariate.  
+eststo predict_dhe_mcs: reg dhe_mcs c.dag i.dgn i.swv i.dhe c.dhm, vce(robust) // Physical health has a big impact, so included as covariate.  
 restore
-estimates restore predict_dwb_mcs
-predict dwb_mcs_prediction
-// fre dwb_mcs_prediction
+estimates restore predict_dhe_mcs
+predict dhe_mcs_prediction
+// fre dhe_mcs_prediction
 
-gen dwb_mcs_flag = missing(dwb_mcs)
-replace dwb_mcs = round(dwb_mcs_prediction) if missing(dwb_mcs) 
-bys dwb_mcs_flag : sum dwb_mcs 
+gen dhe_mcs_flag = missing(dhe_mcs)
+replace dhe_mcs = round(dhe_mcs_prediction) if missing(dhe_mcs) 
+bys dhe_mcs_flag : sum dhe_mcs 
 
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
-eststo predict_dwb_pcs: reg dwb_pcs c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+eststo predict_dhe_pcs: reg dhe_pcs c.dag i.dgn i.swv i.dhe c.dhm c.dhe_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
 restore
-estimates restore predict_dwb_pcs
-predict dwb_pcs_prediction
-// fre dwb_pcs_prediction
+estimates restore predict_dhe_pcs
+predict dhe_pcs_prediction
+// fre dhe_pcs_prediction
 
-gen dwb_pcs_flag = missing(dwb_pcs)
-replace dwb_pcs = round(dwb_pcs_prediction) if missing(dwb_pcs) 
-bys dwb_pcs_flag : sum dwb_pcs 
+gen dhe_pcs_flag = missing(dhe_pcs)
+replace dhe_pcs = round(dhe_pcs_prediction) if missing(dhe_pcs) 
+bys dhe_pcs_flag : sum dhe_pcs 
 
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
-eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dhe_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
 restore
 estimates restore predict_dls
 predict dls_prediction
@@ -1497,7 +1497,7 @@ replace dwt = 0 if missing(dwt)
 /***************************Keep required variables****************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
-        dwb_mcs dwb_pcs dls ///
+        dhe_mcs dhe_pcs dls ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date
@@ -1508,7 +1508,7 @@ sort swv idhh idperson
 /**************************Recode missing values*******************************/
 foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
-        dwb_mcs dwb_pcs dls ///
+        dhe_mcs dhe_pcs dls ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
 	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  {
