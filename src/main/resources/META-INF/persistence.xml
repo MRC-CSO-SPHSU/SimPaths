@@ -14,11 +14,25 @@
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="cdata.jdbc.parquet.ParquetDriver" />
-			<property name="hibernate.connection.username" value="sa" />
-			<property name="hibernate.connection.password" value="" />
-			<property name="hibernate.connection.url" value="jdbc:parquet:URI=./input/input" />
+			<property name="hibernate.connection.url" value="jdbc:parquet:URI=./input/input.parquet" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="initialise-repository">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<!-- define all classes annotated for database access prior to experiment execution here -->
+		<class>simpaths.data.startingpop.DataParser</class>
+		<class>simpaths.data.startingpop.Processed</class>
+		<class>simpaths.model.Household</class>
+		<class>simpaths.model.BenefitUnit</class>
+		<class>simpaths.model.Person</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="hibernate.connection.driver_class" value="cdata.jdbc.parquet.ParquetDriver" />
+			<property name="hibernate.connection.url" value="jdbc:parquet:URI=input/input.parquet;" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 		</properties>
 	</persistence-unit>
 
@@ -34,7 +48,7 @@
 			<property name="hibernate.connection.driver_class" value="cdata.jdbc.parquet.ParquetDriver" />
 			<property name="hibernate.connection.username" value="sa" />
 			<property name="hibernate.connection.password" value="" />
-			<property name="hibernate.connection.url" value="jdbc:parquet:URI=./input/input" />
+			<property name="hibernate.connection.url" value="jdbc:parquet:URI=./input/input.parquet" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 		</properties>
@@ -44,8 +58,6 @@
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="cdata.jdbc.parquet.ParquetDriver" />
-			<property name="hibernate.connection.username" value="sa" />
-			<property name="hibernate.connection.password" value="" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 			<property name="hibernate.archive.autodetection" value="class" />
@@ -66,8 +78,6 @@
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="cdata.jdbc.parquet.ParquetDriver" />
-			<property name="hibernate.connection.username" value="sa" />
-			<property name="hibernate.connection.password" value="" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 		</properties>

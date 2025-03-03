@@ -11,6 +11,10 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
 import simpaths.data.FormattedDialogBox;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Country;
@@ -23,12 +27,23 @@ public class DataParser {
 	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, int startYear, int endYear, Connection conn) {
 
 		//Initialise repository table for country-year-population size combinations
-		initialiseRepository(conn, startYear);
+		System.out.println("Start initialising repo");
+//		initialiseRepository(conn, startYear);
+
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("initialise-repository");
+		EntityManager em = emf.createEntityManager();
+
+		// Call the Hibernate method
+		initialiseRepository(em, startYear);
+
+
 
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
-			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, em, country, year);
 		}
+		em.close();
+		emf.close();
 	}
 
 	private static void initialiseRepository(Connection conn, int startYear) {
@@ -52,10 +67,32 @@ public class DataParser {
 		}
 	}
 
+	public static void initialiseRepository(EntityManager entityManager, int startYear) {
+		EntityTransaction transaction = entityManager.getTransaction();
+		try {
+			transaction.begin();
+
+			// Drop table if necessary (Hibernate doesn't directly support DROP TABLE, but you can do it via native query)
+			entityManager.createNativeQuery("DROP TABLE IF EXISTS processed;").executeUpdate();
+
+			// Create a new entry in the processed table (Hibernate handles table creation based on the entity)
+			entityManager.createNativeQuery( "CREATE TABLE processed (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", POP_SIZE INT DEFAULT 0);").executeUpdate();
+//			Processed processed = new Processed(startYear);
+//			entityManager.persist(processed);
+
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction.isActive()) {
+				transaction.rollback();
+			}
+			e.printStackTrace();
+		}
+	}
+
 	//CREATE PERSON AND HOUSEHOLD TABLES IN INPUT DATABASE BY USING SQL COMMANDS ON EUROMOD POPULATION DATA
 	//donorTables set to true means that this method is being used to create donor population tables, 
 	//as opposed to the initial population for simulation
-	private static void parse(String inputFileLocation, String inputFileName, Connection conn, Country country, int startyear) {
+	private static void parse(String inputFileLocation, String inputFileName, EntityManager em, Country country, int startyear) {
 
 		//Set name of tables
 		String personTable = "person_" + country + "_" + startyear;
@@ -74,8 +111,8 @@ public class DataParser {
 
 		Statement stat = null;
 		try {
-			stat = conn.createStatement();
-			stat.execute(
+//			stat = em.createStatement();
+			em.createNativeQuery(
 				//SQL statements creating database tables go here
 				//Refresh table
 				"DROP TABLE IF EXISTS " + inputFileName + " CASCADE;"
@@ -224,20 +261,20 @@ public class DataParser {
 
 				//Re-order by id
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
-			);
+			).executeUpdate();
 
 			if (PROCESS_KEY_IDENTIFICATION) {
-				stat.execute(
+				em.createNativeQuery(
 						"ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT NOT NULL;"
 							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_time INT NOT NULL;"
 							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_run INT NOT NULL;"
 							+ "ALTER TABLE " + personTable + " ALTER COLUMN working_id INT NOT NULL;"
 							+ "ALTER TABLE " + personTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
-				);
+				).executeUpdate();
 			}
 
 			// CREATE BENEFITUNIT TABLE
-			stat.execute(
+			em.createNativeQuery(
 				"DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO hhid;"
@@ -245,17 +282,17 @@ public class DataParser {
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhrun INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN prid INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
-			);
+			).executeUpdate();
 
 			//Region - See Region class for mapping definitions and sources of info
 			Parameters.setCountryRegions(country);
 			for(Region region: Parameters.getCountryRegions()) {
-				stat.execute(
+				em.createNativeQuery(
 					"UPDATE " + benefitUnitTable + " SET region = '" + region + "' WHERE drgn1 = " + region.getValue() + ";"
-				);
+				).executeUpdate();
 			}
 
-			stat.execute(
+			em.createNativeQuery(
 				"ALTER TABLE " + benefitUnitTable + " DROP COLUMN drgn1;"
 
 				//INCOME: BenefitUnit income - quintiles
@@ -288,27 +325,27 @@ public class DataParser {
 
 				//Re-order by id
 				+ "SELECT * FROM " + benefitUnitTable + " ORDER BY id;"
-			);
+			).executeUpdate();
 
 			//Remove duplicate rows
-			stat.execute(
+			em.createNativeQuery(
 				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + ";"
 				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
-			);
+			).executeUpdate();
 
 			if (PROCESS_KEY_IDENTIFICATION) {
-				stat.execute(
+				em.createNativeQuery(
 						"ALTER TABLE " + benefitUnitTable + " ALTER COLUMN id BIGINT NOT NULL;"
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
-				);
+				).executeUpdate();
 			}
 
 			// CREATE HOUSEHOLD TABLE
-			stat.execute(
+			em.createNativeQuery(
 					"DROP TABLE IF EXISTS " + householdTable + ";"
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
 							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
@@ -317,51 +354,46 @@ public class DataParser {
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN working_id INT DEFAULT 0;"
 							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
 
-			);
+			).executeUpdate();
 
 			//Remove duplicate rows
-			stat.execute(
+			em.createNativeQuery(
 					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + ";"
 				+ "DROP TABLE IF EXISTS " + householdTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + householdTable + ";"
-			);
+			).executeUpdate();
 
 			if (PROCESS_KEY_IDENTIFICATION) {
 
-				stat.execute(
+				em.createNativeQuery(
 						"ALTER TABLE " + householdTable + " ALTER COLUMN id BIGINT NOT NULL;"
 								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
 								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
 								+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
 								+ "ALTER TABLE " + householdTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
-				);
+				).executeUpdate();
 			}
 
 			//Set-up foreign keys
 			if (PROCESS_KEY_IDENTIFICATION) {
 
-				stat.execute(
+				em.createNativeQuery(
 						"ALTER TABLE " + benefitUnitTable + " ADD FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES "
 								+ householdTable + " (id, simulation_time, simulation_run, working_id);"
 								+ "ALTER TABLE " + personTable + " ADD FOREIGN KEY (buid, butime, burun, prid) REFERENCES "
 								+ benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
-				);
+				).executeUpdate();
 			}
 
-			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
+			em.createNativeQuery("DROP TABLE IF EXISTS " + inputFileName + ";").executeUpdate();
 
 		} catch(Exception e){
 		//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
 			 e.printStackTrace();
 		}
 		finally {
-			try {
-				if(stat != null)
-					stat.close();
-			} catch (SQLException e) {
-
-				e.printStackTrace();
-			}
+				if(em != null)
+					em.close();
 		}
 	}
 

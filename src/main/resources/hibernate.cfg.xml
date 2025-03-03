@@ -10,7 +10,7 @@
 
         <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
         <property name="hibernate.connection.driver_class">cdata.jdbc.parquet.ParquetDriver</property>
-        <property name="hibernate.connection.url">jdbc:parquet:URI=./input/input</property>
+        <property name="hibernate.connection.url">jdbc:parquet:URI=./input/input.parquet</property>
         <property name="hibernate.connection.username">sa</property>
         <property name="hibernate.connection.password"></property>
         <property name="hbm2ddl.auto">update</property>

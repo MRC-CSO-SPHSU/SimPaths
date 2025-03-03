@@ -23,6 +23,7 @@ import simpaths.data.Parameters;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
 import simpaths.model.taxes.*;
+import simpaths.data.startingpop.Processed;
 
 
 /**
@@ -62,8 +63,8 @@ public class TaxDonorDataParser {
         // establish database connection
         Connection conn = null;
         try {
-            Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+//            Class.forName("org.h2.Driver");
+            conn = DriverManager.getConnection("jdbc:parquet:URI=./input" + File.separator + "input.parquet");
 
             createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
@@ -72,15 +73,11 @@ public class TaxDonorDataParser {
             conn.close();
             conn = null;
         }
-        catch(ClassNotFoundException | SQLException e) {
-            if(e instanceof ClassNotFoundException) {
+        catch(SQLException e) {
                 System.out.println( "ERROR: Class not found: " + e.getMessage() + "\nCheck that the input.h2.db "
                     + "exists in the input folder.  If not, unzip the input.h2.zip file and store the resulting "
                     + "input.h2.db in the input folder!\n");
-            }
-            else {
                 throw new IllegalArgumentException("SQL Exception thrown! " + e.getMessage());
-            }
         }
         finally {
             try {

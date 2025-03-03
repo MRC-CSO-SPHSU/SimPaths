@@ -15,6 +15,7 @@ import java.util.*;
  *
  */
 @Entity
+@Table(name = "processed")
 public class Processed {
 
 
@@ -47,6 +48,10 @@ public class Processed {
     public Processed(long id, Country country, Integer startYear, Integer popSize, Boolean noTargets) {
         this(country, startYear, popSize, noTargets);
         this.id = id;
+    }
+
+    public Processed(Integer startYear) {
+        this.startYear = startYear;
     }
 
 

@@ -2287,12 +2287,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
             if (isFirstRun) {
 
-                Class.forName("org.h2.Driver");
-                conn = DriverManager.getConnection("jdbc:parquet:URI=./input" + File.separator + "input", "sa", "");
+//                Class.forName("org.h2.Driver");
+                conn = DriverManager.getConnection("jdbc:parquet:URI=./input" + File.separator + "input.parquet");
                 TaxDonorDataParser.updateDefaultDonorTables(conn, country);
             }
         }
-        catch(ClassNotFoundException|SQLException e){
+        catch(SQLException e){
             throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
         } finally {
             try {
@@ -2312,7 +2312,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Class.forName("org.h2.Driver");
             System.out.println("Reading from database at " + DatabaseUtils.databaseInputUrl);
             try {
-                conn = DriverManager.getConnection("jdbc:parquet:URI="+DatabaseUtils.databaseInputUrl + "", "sa", "");
+                conn = DriverManager.getConnection("jdbc:parquet:URI="+DatabaseUtils.databaseInputUrl + ".parquet");
             }
             catch (SQLException e) {
                 log.info(e.getMessage());
@@ -3161,7 +3161,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 // access database and obtain donor pool
                 Map propertyMap = new HashMap();
-                propertyMap.put("hibernate.connection.url", "jdbc:parquet:URI=" + DatabaseUtils.databaseInputUrl);
+                propertyMap.put("hibernate.connection.url", "jdbc:parquet:URI=" + DatabaseUtils.databaseInputUrl + ".parquet");
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
@@ -3325,7 +3325,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
 
             Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:parquet:URI=" + DatabaseUtils.databaseInputUrl);
+            propertyMap.put("hibernate.connection.url", "jdbc:parquet:URI=" + DatabaseUtils.databaseInputUrl + ".parquet");
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
