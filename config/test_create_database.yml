@@ -6,8 +6,8 @@ countryString: "United Kingdom"
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
-endYear: 2030
-popSize: 40000
+endYear: 2035
+popSize: 200000
 
     
 parameter_args:
