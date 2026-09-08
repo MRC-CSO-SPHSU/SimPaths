@@ -2,10 +2,17 @@
 # Arguments of the SimPathsMultiRun object overridden by the command-line
 
 maxNumberOfRuns: 1
+<<<<<<< HEAD
 countryString: "United Kingdom"
 executeWithGui: false
 startYear: 2015
 endYear: 2030
+=======
+countryString: United Kingdom
+executeWithGui: false
+startYear: 2015
+endYear: 2035
+>>>>>>> c84d8cd69e6e9dd20f06290fe7e8eceec933a31e
 popSize: 100000
 persistCountryYear: false
 
@@ -33,7 +40,6 @@ model_args:
 #    responsesToLowWageOffer: true
 #    saveImperfectTaxDBMatches: false
 #    useSavedBehaviour: false
-#    readGrid: "laptop serial"
 #    saveBehaviour: true
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
