@@ -6,7 +6,7 @@ executeWithGui: false
 countryString: "United Kingdom"
 randomSeed: 100
 startYear: 2011
-endYear: 2035
+endYear: 2030
 popSize: 170000
 
 # Arguments passed to the SimPathsModel

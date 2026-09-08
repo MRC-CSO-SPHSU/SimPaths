@@ -52,7 +52,7 @@ innovation_args:
 collector_args:
 #    calculateGiniCoefficients: false
 #    exportToDatabase: false
-    exportToCSV: false 
+    exportToCSV: true 
 #    persistStatistics: true
 #    persistStatistics2: true
 #    persistPersons: false

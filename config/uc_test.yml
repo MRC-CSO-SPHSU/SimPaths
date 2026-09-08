@@ -55,9 +55,9 @@ collector_args:
 #    exportToCSV: true
 #    persistStatistics: true
 #    persistStatistics2: true
-   persistPersons: true
-   persistBenefitUnits: true
-   persistHouseholds: true
+   persistPersons: false
+   persistBenefitUnits: false
+   persistHouseholds: false
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
 
